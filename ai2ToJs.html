@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI2 和網頁交互範例</title>
+</head>
+<body>
+  <h1>AI2 與網頁交互範例</h1>
+  <p id="dataFromAI2">這裡將顯示來自 App Inventor 的資料。</p>
+
+  <script>
+    // 接收來自 App Inventor 的資料並顯示在網頁上
+    function updateDataFromAI2() {
+      const data = window.AppInventor.getWebViewString();
+      const displayElement = document.getElementById('dataFromAI2');
+      displayElement.textContent = `來自 AI2 的資料：${data}`;
+    }
+
+    // 設置按鈕功能：傳送資料到 App Inventor
+    document.getElementById('sendDataToAI2').addEventListener('click', () => {
+      if (window.AppInventor) {
+        window.AppInventor.setWebViewString("這是來自網頁的資料！");
+      } else {
+        alert("App Inventor 環境未初始化！");
+      }
+    });
+
+  </script>
+</body>
+</html>
