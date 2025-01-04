@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多層嵌套積木</title>
+  <style>
+    svg {
+      border: 1px solid #ccc;
+      user-select: none;
+    }
+    .block {
+      cursor: grab;
+    }
+    .ghost {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>多層嵌套積木</h1>
+  <svg id="workspace" width="800" height="600">
+    <!-- 初始積木 -->
+    <g id="g1" class="block" transform="translate(50, 50)">
+      <rect width="100" height="50" fill="#E3C83F"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G1</text>
+    </g>
+    <g id="g2" class="block" transform="translate(200, 50)">
+      <rect width="100" height="50" fill="#E3A855"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G2</text>
+    </g>
+    <g id="g3" class="block" transform="translate(350, 50)">
+      <rect width="100" height="50" fill="#E3B3F0"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G3</text>
+    </g>
+  </svg>
+
+  <script>
+    const workspace = document.getElementById('workspace');
+    let isDragging = false;
+    let draggedElement = null;
+    let ghostElement = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let targetParent = null;
+
+    // 開始拖曳
+    const startDrag = (event, block) => {
+        isDragging = true;
+        draggedElement = block;
+
+        // 獲取積木的絕對位置
+        const position = getAbsolutePosition(block);
+        const point = getTouchPosition(event);
+
+        offsetX = point.x - position.x;
+        offsetY = point.y - position.y;
+
+        // 複製一個半透明的積木
+        ghostElement = block.cloneNode(true);
+        ghostElement.classList.add('ghost');
+        workspace.appendChild(ghostElement);
+
+        updatePosition(ghostElement, position.x, position.y);
+
+        // 移除原積木
+        block.remove();
+    };
+
+    // 拖曳過程
+    const drag = (event) => {
+        if (!isDragging || !ghostElement) return;
+
+        const point = getTouchPosition(event);
+        updatePosition(ghostElement, point.x - offsetX, point.y - offsetY);
+    };
+
+    // 結束拖曳
+    const endDrag = () => {
+        if (!isDragging || !ghostElement) return;
+
+        if (targetParent) {
+            // 檢查是否存在循環嵌套
+            if (!draggedElement.contains(targetParent)) {
+                targetParent.appendChild(draggedElement);
+                draggedElement.setAttribute('transform', `translate(${0}, ${50})`);
+            } else {
+                console.error("無法將元素嵌套到自身的子節點中！");
+            }
+        } else {
+            // 放回工作區
+            workspace.appendChild(draggedElement);
+            const transform = ghostElement.getAttribute('transform');
+            draggedElement.setAttribute('transform', transform);
+        }
+
+        // 清除幽靈積木
+        ghostElement.remove();
+        ghostElement = null;
+        draggedElement = null;
+        isDragging = false;
+        targetParent = null;
+    };
+
+    // 獲取觸控座標
+    const getTouchPosition = (event) => {
+        const touch = event.touches[0] || event.changedTouches[0];
+        const point = workspace.createSVGPoint();
+        point.x = touch.clientX;
+        point.y = touch.clientY;
+        return point.matrixTransform(workspace.getScreenCTM().inverse());
+    };
+
+    // 計算積木在工作區的絕對位置
+    const getAbsolutePosition = (element) => {
+        let x = 0;
+        let y = 0;
+        let currentElement = element;
+
+        while (currentElement) {
+            if (currentElement instanceof SVGElement) {
+                const transform = currentElement.getAttribute('transform');
+                if (transform) {
+                    const [offsetX, offsetY] = transform.match(/translate\(([^,]+), ([^)]+)\)/).slice(1).map(Number);
+                    x += offsetX;
+                    y += offsetY;
+                }
+            }
+            currentElement = currentElement.parentNode;
+        }
+        return { x, y };
+    };
+
+    // 更新積木位置
+    const updatePosition = (element, x, y) => {
+        element.setAttribute('transform', `translate(${x}, ${y})`);
+    };
+
+    // 綁定觸控事件
+    document.querySelectorAll('.block').forEach((block) => {
+        block.addEventListener('touchstart', (event) => {
+            if (!isDragging || event.target.closest('.block') === draggedElement) {
+                startDrag(event, block);
+            }
+            event.preventDefault(); // 防止默認行為（如滾動）
+        });
+    });
+
+    workspace.addEventListener('touchmove', (event) => {
+        drag(event);
+        event.preventDefault(); // 防止默認行為（如滾動）
+    });
+
+    workspace.addEventListener('touchend', endDrag);
+
+    // 偵測進入其他 g 的事件
+    document.querySelectorAll('.block').forEach((block) => {
+            block.addEventListener('touchenter', (event) => {
+                const targetBlock = event.target.closest('.block');
+                if (isDragging && block !== draggedElement && !draggedElement.contains(block)) {
+                    targetParent = block;
+                }
+            });
+
+            block.addEventListener('touchleave', (event) => {
+                const targetBlock = event.target.closest('.block');
+                if (targetBlock === targetParent) {
+                    targetParent = null;
+                }
+            });
+        });
+  </script>
+
+</body>
+</html>
