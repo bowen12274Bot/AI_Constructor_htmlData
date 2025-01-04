@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多層嵌套積木</title>
+  <style>
+    svg {
+      border: 1px solid #ccc;
+      user-select: none;
+    }
+    .block {
+      cursor: grab;
+    }
+    .ghost {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>多層嵌套積木</h1>
+  <svg id="workspace" width="800" height="600">
+    <!-- 初始積木 -->
+    <g id="g1" class="block" transform="translate(50, 50)">
+      <rect width="100" height="50" fill="#E3C83F"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G1</text>
+    </g>
+    <g id="g2" class="block" transform="translate(200, 50)">
+      <rect width="100" height="50" fill="#E3A855"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G2</text>
+    </g>
+    <g id="g3" class="block" transform="translate(350, 50)">
+      <rect width="100" height="50" fill="#E3B3F0"></rect>
+      <text x="50" y="30" fill="black" text-anchor="middle">G3</text>
+    </g>
+  </svg>
+
+  <script>
+    const workspace = document.getElementById('workspace');
+    let isDragging = false;
+    let draggedElement = null;
+    let ghostElement = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // 開始拖曳
+    const startDrag = (event, block) => {
+        isDragging = true;
+        draggedElement = block;
+
+        // 獲取積木的絕對位置
+        const position = getAbsolutePosition(block);
+        const point = getMousePosition(event);
+
+        offsetX = point.x - position.x;
+        offsetY = point.y - position.y;
+
+        // 複製一個半透明的積木
+        ghostElement = block.cloneNode(true);
+        ghostElement.classList.add('ghost');
+        workspace.appendChild(ghostElement);
+
+        updatePosition(ghostElement, position.x, position.y);
+
+        // 傳遞事件和積木資訊到 AI2
+        sendToAI2({
+          action: "startDrag",
+          blockId: block.id,
+          position: position
+        });
+
+        // 移除原積木
+        block.remove();
+    };
+
+    // 拖曳過程
+    const drag = (event) => {
+      event.preventDefault();
+      if (!isDragging || !ghostElement) return;
+
+      const point = getMousePosition(event);
+      updatePosition(ghostElement, point.x - offsetX, point.y - offsetY);
+    };
+
+    // 獲取滑鼠座標
+    const getMousePosition = (event) => {
+      const point = workspace.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+      return point.matrixTransform(workspace.getScreenCTM().inverse());
+    };
+
+    // 計算積木在工作區的絕對位置
+    const getAbsolutePosition = (element) => {
+        let x = 0;
+        let y = 0;
+        let currentElement = element;
+
+        while (currentElement) {
+            // 確保 currentElement 是一個 SVG 或 g 元素
+            if (currentElement instanceof SVGElement) {
+                const transform = currentElement.getAttribute('transform');
+                if (transform) {
+                    const [offsetX, offsetY] = transform.match(/translate\(([^,]+), ([^)]+)\)/).slice(1).map(Number);
+                    x += offsetX;
+                    y += offsetY;
+                }
+            }
+            currentElement = currentElement.parentNode;
+        }
+        return { x, y };
+    };
+
+    // 更新積木位置
+    const updatePosition = (element, x, y) => {
+        element.setAttribute('transform', `translate(${x}, ${y})`);
+        // 傳遞事件和積木資訊到 AI2
+        sendToAI2({
+            action: "startDrag",
+        });
+    };
+
+    // 傳遞資料到AI2
+    const sendToAI2 = (data) => {
+        if (window.AppInventor) {
+            window.AppInventor.setWebViewString(JSON.stringify(data));
+        } else {
+            console.log("資料傳遞到 AI2：", data);
+        }
+    };
+
+    // 接收AI2的資料
+    const receiveFromAi2 = (data) => {
+        const parsedData = JSON.parse(data);
+        if (parsedData.action === "") {
+        }   
+    }
+
+    // 綁定拖曳事件
+    document.querySelectorAll('.block').forEach((block) => {
+      block.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        if (!isDragging || event.target.closest('.block') === draggedElement) {
+            startDrag(event, block);
+        }
+        event.stopPropagation();
+      });
+    });
+    workspace.addEventListener('mousemove', drag);
+  </script>
+</body>
+</html>
