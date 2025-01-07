@@ -223,3 +223,9 @@ export function createMainBlock(
   // 添加到工作區
   workspace.appendChild(block);
 }
+
+// 暴露到主程式
+window.createMainBlock = createMainBlock;
+window.createDataBlock = createDataBlock;
+window.createSetVariableBlock = createSetVariableBlock;
+window.createParameterBlock = createParameterBlock;
