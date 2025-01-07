@@ -336,21 +336,18 @@ document.querySelectorAll(".editable-group").forEach((group) => {
   });
 });
 // 綁定拖曳事件
-workspace.addEventListener("touchstart", (event) => {
-  if (isEditing) {
-    event.stopPropagation(); // 如果正在編輯，阻止拖曳事件
-    return;
-  }
-  const block = event.target.closest(".block");
-  if (block) {
-    startDrag(event, block); // 開始拖曳
-  }
-});
-workspace.addEventListener("touchmove", (event) => {
-  if (isEditing) return; // 如果正在編輯，不執行拖曳
-  drag(event); // 拖曳邏輯
-});
-workspace.addEventListener("touchend", (event) => {
-  if (isEditing) return; // 如果正在編輯，不執行結束拖曳
-  endDrag(); // 結束拖曳邏輯
-});
+document.querySelectorAll('.block').forEach((block) => {
+        block.addEventListener('touchstart', (event) => {
+            if (!isDragging || event.target.closest('.block') === draggedElement) {
+                startDrag(event, block);
+            }
+            event.preventDefault(); // 防止默認行為（如滾動）
+        });
+    });
+
+    workspace.addEventListener('touchmove', (event) => {
+        drag(event);
+        event.preventDefault(); // 防止默認行為（如滾動）
+    });
+
+    workspace.addEventListener('touchend', endDrag);
