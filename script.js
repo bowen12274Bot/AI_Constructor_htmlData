@@ -291,6 +291,7 @@ document.querySelectorAll(".block").forEach((block) => {
     if (!isDragging || event.target.closest(".block") === draggedElement) {
       startDrag(event, block);
     }
+    event.preventDefault();
     event.stopPropagation();
   });
 });
