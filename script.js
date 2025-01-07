@@ -336,7 +336,7 @@ document.querySelectorAll(".editable-group").forEach((group) => {
   });
 });
 // 綁定拖曳事件
-workspace.addEventListener("mousedown", (event) => {
+workspace.addEventListener("touchstart", (event) => {
   if (isEditing) {
     event.stopPropagation(); // 如果正在編輯，阻止拖曳事件
     return;
@@ -346,11 +346,11 @@ workspace.addEventListener("mousedown", (event) => {
     startDrag(event, block); // 開始拖曳
   }
 });
-workspace.addEventListener("mousemove", (event) => {
+workspace.addEventListener("touchmove", (event) => {
   if (isEditing) return; // 如果正在編輯，不執行拖曳
   drag(event); // 拖曳邏輯
 });
-workspace.addEventListener("mouseup", (event) => {
+workspace.addEventListener("touchend", (event) => {
   if (isEditing) return; // 如果正在編輯，不執行結束拖曳
   endDrag(); // 結束拖曳邏輯
 });
