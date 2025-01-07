@@ -230,7 +230,7 @@ const trySnapToBlock = (draggedElement, targetParent) => {
 };
 
 // 調整積木高度
-const updatePathHeight = (block, baseHeight = 22, extraHeight = 30) => {
+const updatePathHeight = (block, baseHeight = 22, extraHeight = 60) => {
   if (!block || !block.hasAttribute("data-adjustable-height")) return;
 
   // 計算子積木中影響高度的最大深度
@@ -241,9 +241,9 @@ const updatePathHeight = (block, baseHeight = 22, extraHeight = 30) => {
   if (depth === 0) {
     newHeight = 22;
   } else if (depth === 2) {
-    newHeight = baseHeight + 5;
+    newHeight = baseHeight + 10;
   } else {
-    newHeight = baseHeight + 3 + (depth - 1) * extraHeight;
+    newHeight = baseHeight - 55 + (depth - 1) * extraHeight;
   }
 
   // 更新路徑高度
