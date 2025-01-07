@@ -291,20 +291,6 @@ const updateAllParentHeights = (block) => {
   }
 };
 
-// 新增設定變數積木按鈕
-document.getElementById("addParameterBlock").addEventListener("click", () => {
-  createParameterBlock(workspace, 100, 100, "");
-});
-document.getElementById("addSetVariableBlock").addEventListener("click", () => {
-  createSetVariableBlock(workspace, 100, 100, "宣告變數");
-});
-document.getElementById("addDataBlock").addEventListener("click", () => {
-  createDataBlock(workspace, 100, 100, "設定變數為");
-});
-document.getElementById("addMainBlock").addEventListener("click", () => {
-  createMainBlock(workspace, 100, 100, "輸出運算結果");
-});
-
 // 綁定拖曳事件
 document.querySelector("#workspace").addEventListener("touchstart", (event) => {
   const block = event.target.closest(".block");
