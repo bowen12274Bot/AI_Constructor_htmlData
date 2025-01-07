@@ -5,7 +5,12 @@ let ghostElement = null;
 let offsetX = 0;
 let offsetY = 0;
 let targetParent = null;
-let isEditing = false;
+import {
+  createParameterBlock,
+  createSetVariableBlock,
+  createDataBlock,
+  createMainBlock,
+} from "./blocks.js";
 
 // 開始拖曳
 const startDrag = (event, block) => {
@@ -285,6 +290,20 @@ const updateAllParentHeights = (block) => {
     }
   }
 };
+
+// 新增設定變數積木按鈕
+document.getElementById("addParameterBlock").addEventListener("click", () => {
+  createParameterBlock(workspace, 100, 100, "");
+});
+document.getElementById("addSetVariableBlock").addEventListener("click", () => {
+  createSetVariableBlock(workspace, 100, 100, "宣告變數");
+});
+document.getElementById("addDataBlock").addEventListener("click", () => {
+  createDataBlock(workspace, 100, 100, "設定變數為");
+});
+document.getElementById("addMainBlock").addEventListener("click", () => {
+  createMainBlock(workspace, 100, 100, "輸出運算結果");
+});
 
 // 綁定拖曳事件
 document.querySelector("#workspace").addEventListener("touchstart", (event) => {
